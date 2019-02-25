@@ -3,6 +3,27 @@ import Libdl
 mutable struct GLFunc
     p::Ptr{Nothing}
 end
+
+include(joinpath("..", "deps", "deps.jl"))
+
+gl_represent(x::GLenum) = GLENUM(x).name
+gl_represent(x) = repr(x)
+
+function debug_opengl_expr(func_name, args)
+    if enable_opengl_debugging && func_name != :glGetError
+        quote
+            err = glGetError()
+            if err != GL_NO_ERROR
+                arguments = gl_represent.(tuple($(args...)))
+                warn("OpenGL call to $($func_name), with arguments: $(arguments)
+                Failed with error: $(GLENUM(err).name).")
+            end
+        end
+    else
+        :()
+    end
+end
+
 # based on getCFun macro
 macro glfunc(opengl_func)
     arguments = map(opengl_func.args[1].args[2:end]) do arg

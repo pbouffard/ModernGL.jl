@@ -4,7 +4,12 @@ os:
 dist: trusty
 julia:
   - 0.6
+  - 0.7
   - nightly
+matrix:
+  allow_failures:
+    - julia: nightly
+
 notifications:
   email: false
 addons:
